@@ -485,14 +485,69 @@
       if (p && p.catch) p.catch((err) => { if (err && err.name === "NotAllowedError") swapToAnimated(v); });
       watch(v);
     };
-    vids.forEach((v) => {
+    /* ---- Chargement adapté à la connexion ----
+       Chaque vidéo démarre en version légère (~0,2-0,45 Mo) pour s'afficher tout de suite,
+       même en 3G. Si la connexion est bonne, la version HD (data-hd) est téléchargée en
+       arrière-plan puis remplace la légère sans coupure, au même instant de la vidéo.
+       Connexion lente, mode économie de données : on reste sur la version légère. */
+    const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    const mbps = (url) => { // débit mesuré pendant le chargement de la version légère
+      try {
+        const e = performance.getEntriesByName(new URL(url, location.href).href).pop();
+        if (!e || !e.duration || !e.transferSize) return null;
+        return (e.transferSize * 8) / (e.duration * 1000);
+      } catch { return null; }
+    };
+    const goodConnection = (v) => {
+      if (conn) {
+        if (conn.saveData) return false;
+        if (/(^|-)(2g|3g)$/.test(conn.effectiveType || "")) return false;
+        if (conn.downlink && conn.downlink < 3) return false;
+        return true;
+      }
+      // Pas d'API réseau (Safari/iPhone) : on mesure le débit réel de la version légère
+      const src = v.currentSrc || "";
+      const m = mbps(src);
+      if (m !== null) return m >= 4;
+      return v.readyState >= 4; // la légère est entièrement chargée : on tente la HD
+    };
+    const upgradeToHd = (v) => {
+      if (!v.dataset.hd || v.dataset.hdTried || v.dataset.swapped || !v.isConnected) return;
+      if (!goodConnection(v)) return;
+      v.dataset.hdTried = 1;
+      const hd = document.createElement("video");
+      hd.muted = true; hd.defaultMuted = true; hd.playsInline = true; hd.loop = true; hd.preload = "auto";
+      ["muted", "playsinline", "webkit-playsinline", "loop", "disablepictureinpicture", "disableremoteplayback"].forEach((a) => hd.setAttribute(a, ""));
+      hd.src = v.dataset.hd;
+      hd.addEventListener("canplaythrough", () => {
+        if (!v.isConnected || v.dataset.swapped) return;
+        try { hd.currentTime = v.currentTime % (hd.duration || 1); } catch {}
+        const p = hd.play();
+        (p && p.then ? p : Promise.resolve()).then(() => {
+          if (!v.isConnected || v.dataset.swapped) { hd.pause(); return; }
+          hd.className = v.className; if (v.id) hd.id = v.id;
+          hd.poster = v.poster;
+          Object.assign(hd.dataset, { auto: "", loaded: "1", hdTried: "1", fallback: v.dataset.fallback || "", fallbackAvif: v.dataset.fallbackAvif || "" });
+          setup(hd);
+          io.unobserve(v); visible.delete(v); clearTimeout(v._watch);
+          v.replaceWith(hd); v.pause(); v.removeAttribute("src"); v.load();
+          io.observe(hd);
+        }).catch(() => {});
+      }, { once: true });
+      hd.load();
+    };
+
+    function setup(v) {
       v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = true;
       v.setAttribute("muted", ""); v.setAttribute("playsinline", ""); v.setAttribute("webkit-playsinline", "");
       v.removeAttribute("controls");
       v.addEventListener("click", () => tryPlay(v));
+      // passe en HD une fois la version légère bien lancée
+      v.addEventListener("playing", () => setTimeout(() => visible.has(v) && upgradeToHd(v), 1200));
       // si le fichier est introuvable, on garde l'image (poster) au lieu d'un cadre vide
       $$("source", v).forEach((s) => s.addEventListener("error", () => v.removeAttribute("src")));
-    });
+    }
+    vids.forEach(setup);
     io = new IntersectionObserver((entries) => entries.forEach((en) => {
       const v = en.target;
       if (en.isIntersecting) { visible.add(v); tryPlay(v); } else { visible.delete(v); v.pause(); }
