@@ -1,0 +1,1 @@
+{ "name": "BELIEVE ME", "short_name": "BELIEVE ME", "start_url": "/", "display": "standalone", "background_color": "#0d0b0a", "theme_color": "#0d0b0a", "icons": [{ "src": "assets/favicon.svg", "sizes": "any", "type": "image/svg+xml" }] }

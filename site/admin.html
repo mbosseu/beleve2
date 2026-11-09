@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>BELIEVE ME — Précommandes</title>
+  <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500&family=Manrope:wght@400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root { --ink:#0d0b0a; --paper:#f3efe9; --line:rgba(13,11,10,.12); --muted:#8a8178; --choco:#3b2418; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: Manrope, system-ui, sans-serif; background: var(--paper); color: var(--ink); }
+    header { display:flex; justify-content:space-between; align-items:center; gap:16px; padding:18px 24px; background: var(--ink); color:#efe6d8; flex-wrap: wrap; }
+    header h1 { font-family:"Cormorant Garamond", serif; font-weight:500; letter-spacing:.25em; font-size:22px; margin:0; }
+    main { padding: 24px; max-width: 1400px; margin: 0 auto; }
+    .login { max-width: 380px; margin: 12vh auto; background:#fff; padding:28px; border-radius:16px; border:1px solid var(--line); }
+    input, select, button { font: inherit; }
+    input { width:100%; height:46px; border:1px solid var(--line); border-radius:10px; padding:0 12px; margin: 10px 0; }
+    button, .btn { height:42px; padding:0 16px; border-radius:100px; border:1px solid var(--ink); background: var(--ink); color:#efe6d8; cursor:pointer; font-weight:600; font-size:13px; text-decoration:none; display:inline-flex; align-items:center; }
+    .btn--ghost { background:transparent; color:inherit; border-color: currentColor; }
+    .kpis { display:grid; grid-template-columns: repeat(auto-fit, minmax(180px,1fr)); gap:12px; margin-bottom: 20px; }
+    .kpi { background:#fff; border:1px solid var(--line); border-radius:14px; padding:18px; }
+    .kpi small { color: var(--muted); font-size:12px; text-transform: uppercase; letter-spacing:.12em; }
+    .kpi b { display:block; font-size:34px; font-family:"Cormorant Garamond", serif; font-weight:500; }
+    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(300px,1fr)); gap:12px; margin-bottom: 20px; }
+    .card { background:#fff; border:1px solid var(--line); border-radius:14px; padding:18px; }
+    .card h3 { margin:0 0 14px; font-size:14px; text-transform: uppercase; letter-spacing: .1em; }
+    .bar { display:grid; grid-template-columns: 110px 1fr 40px; gap:10px; align-items:center; font-size:13px; margin-bottom:8px; }
+    .bar i { display:block; height:10px; background: var(--choco); border-radius: 0 6px 6px 0; min-width: 2px; }
+    .bar span:last-child { text-align:right; font-weight:700; }
+    .tablewrap { overflow:auto; background:#fff; border:1px solid var(--line); border-radius:14px; }
+    table { width:100%; border-collapse: collapse; font-size: 13px; }
+    th, td { padding: 10px 12px; border-bottom:1px solid var(--line); text-align:left; white-space: nowrap; }
+    th { background:#faf8f5; position: sticky; top:0; }
+    .tools { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin: 0 0 12px; }
+    .tools input { width: 260px; margin:0; }
+    .err { color:#a3271d; font-size: 13px; }
+    .insight { background: var(--ink); color:#efe6d8; border-radius:14px; padding:18px 20px; margin-bottom: 20px; line-height:1.6; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>BELIEVE ME · PRÉCOMMANDES</h1>
+    <div id="hdrTools" hidden style="display:flex;gap:8px">
+      <a class="btn btn--ghost" id="csvBtn" href="#">Exporter CSV (Excel)</a>
+      <button class="btn--ghost btn" id="refresh">Actualiser</button>
+      <button class="btn--ghost btn" id="logout">Déconnexion</button>
+    </div>
+  </header>
+  <main>
+    <form class="login" id="login">
+      <h2 style="font-family:'Cormorant Garamond',serif;font-weight:500;margin-top:0">Accès privé</h2>
+      <p style="color:var(--muted);font-size:14px">Entre le mot de passe administrateur (variable ADMIN_TOKEN du serveur).</p>
+      <input type="password" id="token" placeholder="Mot de passe" autocomplete="current-password" required />
+      <button type="submit">Entrer</button>
+      <p class="err" id="loginErr"></p>
+    </form>
+
+    <section id="dash" hidden>
+      <div class="insight" id="insight"></div>
+      <div class="kpis" id="kpis"></div>
+      <div class="grid">
+        <div class="card"><h3>Par couleur (pièces)</h3><div id="byColor"></div></div>
+        <div class="card"><h3>Par taille (pièces)</h3><div id="bySize"></div></div>
+        <div class="card"><h3>Par pays</h3><div id="byCountry"></div></div>
+        <div class="card"><h3>Plan de production (couleur / taille)</h3><div id="byCombo"></div></div>
+        <div class="card"><h3>Précommandes par jour</h3><div id="byDay"></div></div>
+      </div>
+      <div class="tools"><input id="search" placeholder="Rechercher (nom, e-mail, pays, réf.)" /><span id="count" style="color:var(--muted);font-size:13px"></span></div>
+      <div class="tablewrap"><table><thead><tr><th>Réf.</th><th>Date</th><th>Statut</th><th>Couleur</th><th>Taille</th><th>Qté</th><th>Client</th><th>E-mail</th><th>Téléphone</th><th>Pays</th><th>Ville</th><th>Source</th></tr></thead><tbody id="rows"></tbody></table></div>
+    </section>
+  </main>
+  <script>
+    const $ = (s) => document.querySelector(s);
+    let token = sessionStorage.getItem("bm_admin") || "";
+    let data = null;
+    const names = (() => { try { return new Intl.DisplayNames(["fr"], { type: "region" }); } catch { return { of: (c) => c }; } })();
+    const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+    async function load() {
+      const r = await fetch("/api/admin/preorders", { headers: { Authorization: "Bearer " + token } });
+      if (r.status === 401) { sessionStorage.removeItem("bm_admin"); $("#login").hidden = false; $("#dash").hidden = true; $("#loginErr").textContent = token ? "Mot de passe incorrect." : ""; return; }
+      data = await r.json();
+      sessionStorage.setItem("bm_admin", token);
+      $("#login").hidden = true; $("#dash").hidden = false; $("#hdrTools").hidden = false;
+      $("#csvBtn").href = "/api/admin/export.csv?token=" + encodeURIComponent(token);
+      render();
+    }
+    function bars(el, obj, label = (k) => k, sort = true) {
+      const entries = Object.entries(obj); if (sort) entries.sort((a, b) => b[1] - a[1]);
+      const max = Math.max(1, ...entries.map((e) => e[1]));
+      $(el).innerHTML = entries.length ? entries.slice(0, 14).map(([k, v]) => `<div class="bar"><span>${esc(label(k))}</span><i style="width:${(v / max) * 100}%"></i><span>${v}</span></div>`).join("") : "<p style='color:var(--muted);font-size:13px'>Pas encore de données.</p>";
+    }
+    function render() {
+      const s = data.stats, list = data.preorders;
+      const goal = 150;
+      const topColor = Object.entries(s.byColor).sort((a, b) => b[1] - a[1])[0];
+      const topSize = Object.entries(s.bySize).sort((a, b) => b[1] - a[1])[0];
+      const countries = Object.keys(s.byCountry).length;
+      const revenue = list.filter((p) => p.status !== "cancelled").reduce((a, p) => a + (p.priceEur || 0) * (p.qty || 1), 0);
+      $("#insight").innerHTML = s.total
+        ? `<b>Lecture rapide :</b> ${s.total} précommandes (${s.units} pièces) venant de ${countries} pays. Couleur la plus demandée : <b>${esc(topColor?.[0])}</b>, taille la plus demandée : <b>${esc(topSize?.[0])}</b>. Objectif de production : ${Math.min(100, Math.round((s.total / goal) * 100))} % atteint.`
+        : "Aucune précommande pour l'instant. Partage le lien du site sur tes réseaux pour lancer la dynamique ✦";
+      $("#kpis").innerHTML = [
+        ["Précommandes", s.total], ["Pièces", s.units], ["Pays", countries], ["CA potentiel", revenue.toLocaleString("fr-FR") + " €"], ["Inscrits newsletter", data.subscribers.length]
+      ].map(([k, v]) => `<div class="kpi"><small>${k}</small><b>${v}</b></div>`).join("");
+      bars("#byColor", s.byColor); bars("#bySize", s.bySize);
+      bars("#byCountry", s.byCountry, (c) => names.of(c) || c);
+      bars("#byCombo", s.byCombo);
+      const days = Object.fromEntries(Object.entries(s.byDay).sort((a, b) => a[0].localeCompare(b[0])).slice(-14));
+      bars("#byDay", days, (d) => d, false);
+      table();
+    }
+    function table() {
+      const q = $("#search").value.toLowerCase();
+      const list = data.preorders.slice().reverse().filter((p) => !q || JSON.stringify(p).toLowerCase().includes(q));
+      $("#count").textContent = list.length + " ligne(s)";
+      $("#rows").innerHTML = list.map((p) => `<tr>
+        <td><b>${esc(p.ref)}</b></td><td>${new Date(p.createdAt).toLocaleString("fr-FR")}</td>
+        <td><select data-ref="${esc(p.ref)}">${["reserved", "confirmed", "paid", "shipped", "cancelled"].map((st) => `<option ${st === p.status ? "selected" : ""} value="${st}">${{ reserved: "Réservée", confirmed: "Confirmée", paid: "Payée", shipped: "Expédiée", cancelled: "Annulée" }[st]}</option>`).join("")}</select></td>
+        <td>${esc(p.color)}</td><td>${esc(p.size)}</td><td>${p.qty}</td><td>${esc(p.firstName)} ${esc(p.lastName)}</td>
+        <td><a href="mailto:${esc(p.email)}">${esc(p.email)}</a></td><td>${esc(p.phone)}</td><td>${esc(names.of(p.country) || p.country)}</td><td>${esc(p.city)}</td><td>${esc(p.source).slice(0, 40)}</td></tr>`).join("");
+    }
+    $("#rows").addEventListener("change", async (e) => {
+      const sel = e.target.closest("select[data-ref]"); if (!sel) return;
+      await fetch("/api/admin/status", { method: "POST", headers: { "Content-Type": "application/json", Authorization: "Bearer " + token }, body: JSON.stringify({ ref: sel.dataset.ref, status: sel.value }) });
+      load();
+    });
+    $("#login").addEventListener("submit", (e) => { e.preventDefault(); token = $("#token").value; load(); });
+    $("#search").addEventListener("input", table);
+    $("#refresh").addEventListener("click", load);
+    $("#logout").addEventListener("click", () => { sessionStorage.removeItem("bm_admin"); location.reload(); });
+    if (token) load();
+  </script>
+</body>
+</html>

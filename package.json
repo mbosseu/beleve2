@@ -1,0 +1,8 @@
+{
+  "name": "believe-me-store",
+  "version": "1.0.0",
+  "private": true,
+  "description": "BELIEVE ME — boutique de précommande",
+  "scripts": { "start": "node server.js" },
+  "engines": { "node": ">=18" }
+}

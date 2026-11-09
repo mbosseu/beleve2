@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="fr"
+  data-composition-variables='[{"id":"tagline","type":"string","label":"Tagline","default":"SOUS-ESTIMÉS. JAMAIS ÉGALÉS."}]'>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=1920, height=1080" />
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.15.0/dist/gsap.min.js"></script>
+    <style>
+      :root {
+        --ground: #0d0b0a;
+        --ink: #efe6d8;
+        --font-display: "EB Garamond";
+      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { margin: 0; width: 1920px; height: 1080px; overflow: hidden; background: var(--ground); }
+      #root { width: 100%; height: 100%; position: relative; background: var(--ground); }
+    </style>
+  </head>
+  <body>
+    <div id="root" data-composition-id="main" data-start="0" data-duration="14" data-width="1920" data-height="1080">
+      <div
+        id="manifesto"
+        data-composition-id="manifesto"
+        data-composition-src="compositions/manifesto.html"
+        data-start="0"
+        data-duration="14"
+        data-track-index="1"
+        data-track-kind="graphics"
+        data-width="1920"
+        data-height="1080"
+      ></div>
+    </div>
+    <script>
+      window.__timelines["main"] = gsap.timeline({ paused: true });
+    </script>
+  </body>
+</html>
