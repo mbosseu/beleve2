@@ -392,7 +392,7 @@
     gsap.registerPlugin(ScrollTrigger);
 
     // Parallax du hero
-    if (!reduced) gsap.to(".hero__media", { yPercent: 18, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
+    if (!reduced && matchMedia("(min-width: 900px)").matches) gsap.to(".hero__media", { yPercent: 18, ease: "none", scrollTrigger: { trigger: ".hero", start: "top top", end: "bottom top", scrub: true } });
 
     // La pièce : étapes
     const piece = $(".piece"), steps = $$(".piece__step");
@@ -438,25 +438,32 @@
   }
 
   function mediaFx() {
-    // Vidéos du lookbook chargées à l'approche
+    // Toutes les vidéos : muettes, en boucle, lues uniquement quand elles sont à l'écran.
+    // Mobile (iOS/Android) : muted doit être posé en propriété, et si le navigateur bloque
+    // la lecture auto (mode économie d'énergie…), on relance au premier toucher/défilement.
+    const vids = $$("video[data-auto]");
+    const visible = new Set();
+    const tryPlay = (v) => {
+      if (!v.dataset.loaded && $("source[data-src]", v)) { $$("source[data-src]", v).forEach((s) => (s.src = s.dataset.src)); v.load(); }
+      v.dataset.loaded = 1;
+      const p = v.play(); if (p && p.catch) p.catch(() => {});
+    };
+    vids.forEach((v) => {
+      v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = true;
+      v.setAttribute("muted", ""); v.setAttribute("playsinline", ""); v.setAttribute("webkit-playsinline", "");
+      v.removeAttribute("controls");
+      v.addEventListener("click", () => tryPlay(v));
+      // si le fichier est introuvable, on garde l'image (poster) au lieu d'un cadre vide
+      $$("source", v).forEach((s) => s.addEventListener("error", () => v.removeAttribute("src")));
+    });
     const io = new IntersectionObserver((entries) => entries.forEach((en) => {
       const v = en.target;
-      if (en.isIntersecting) {
-        if (!v.dataset.loaded) { $$("source[data-src]", v).forEach((s) => (s.src = s.dataset.src)); v.load(); v.dataset.loaded = 1; }
-        v.play().catch(() => {});
-      } else v.pause();
-    }), { rootMargin: "200px" });
-    $$("video[data-lazy-video]").forEach((v) => io.observe(v));
-
-    // Hero : si la vidéo n'existe pas, on garde l'image
-    const hv = $("#heroVideo");
-    hv.addEventListener("error", () => (hv.style.display = "none"), true);
-    $$("source", hv).forEach((s) => s.addEventListener("error", () => (hv.style.display = "none")));
-
-    // Film manifeste : lecture auto à l'écran, bouton pause/lecture
-    const mv = $("#manifestoVideo"), mb = $("#manifestoPlay");
-    new IntersectionObserver(([en]) => { if (en.isIntersecting) mv.play().then(() => (mb.firstElementChild.textContent = t("pause"))).catch(() => {}); else mv.pause(); }, { threshold: 0.4 }).observe(mv);
-    mb.addEventListener("click", () => { if (mv.paused) { mv.play(); mb.firstElementChild.textContent = t("pause"); } else { mv.pause(); mb.firstElementChild.textContent = t("play"); } });
+      if (en.isIntersecting) { visible.add(v); tryPlay(v); } else { visible.delete(v); v.pause(); }
+    }), { rootMargin: "150px 0px", threshold: 0.01 });
+    vids.forEach((v) => io.observe(v));
+    const unlock = () => visible.forEach((v) => v.paused && tryPlay(v));
+    ["touchstart", "pointerdown", "scroll", "keydown"].forEach((ev) => addEventListener(ev, unlock, { passive: true }));
+    document.addEventListener("visibilitychange", () => { if (!document.hidden) unlock(); });
 
     // Lookbook : glisser à la souris
     const rail = $("#lookRail"); let down = false, sx = 0, sl = 0;
