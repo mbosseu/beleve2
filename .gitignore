@@ -1,0 +1,10 @@
+# Données clients (ne jamais publier)
+data/preorders.json
+data/subscribers.json
+data/*.tmp
+# HyperFrames / Node
+film/.hyperframes/
+node_modules/
+*.log
+.DS_Store
+Thumbs.db
