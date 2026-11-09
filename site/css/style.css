@@ -234,7 +234,7 @@ em { font-style: italic; }
 /* ---------- Manifesto ---------- */
 .manifesto { display: grid; grid-template-columns: 1.4fr 1fr; gap: clamp(28px, 5vw, 80px); align-items: center; padding: clamp(80px, 12vw, 160px) var(--gutter); }
 .manifesto__frame { position: relative; aspect-ratio: 16 / 9; background: #000; overflow: hidden; border-radius: var(--radius); }
-.manifesto__frame video { width: 100%; height: 100%; object-fit: cover; }
+.manifesto__frame video, .manifesto__frame img { width: 100%; height: 100%; object-fit: cover; }
 video::-webkit-media-controls, video::-webkit-media-controls-panel, video::-webkit-media-controls-start-playback-button, video::-webkit-media-controls-overlay-play-button { display: none !important; -webkit-appearance: none; opacity: 0; }
 .manifesto blockquote { margin: 0 0 24px; font-family: var(--serif); font-size: clamp(30px, 3.4vw, 50px); line-height: 1.1; }
 .manifesto blockquote p { margin: 0; }

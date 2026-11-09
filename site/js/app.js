@@ -443,10 +443,38 @@
     // la lecture auto (mode économie d'énergie…), on relance au premier toucher/défilement.
     const vids = $$("video[data-auto]");
     const visible = new Set();
+    let io;
+
+    // Si le téléphone refuse la lecture automatique (iPhone en mode économie d'énergie,
+    // économiseur de données Android…), on remplace la vidéo par sa version image animée
+    // (WebP), qui démarre toujours toute seule, sans bouton.
+    const swapToAnimated = (v) => {
+      if (v.dataset.swapped || !v.dataset.fallback || !v.isConnected) return;
+      v.dataset.swapped = 1;
+      const img = new Image();
+      img.decoding = "async";
+      img.alt = "";
+      img.setAttribute("aria-hidden", "true");
+      img.className = v.className + " is-animated";
+      if (v.id) img.id = v.id;
+      img.src = v.dataset.fallback;
+      io && io.unobserve(v);
+      visible.delete(v);
+      v.pause();
+      v.replaceWith(img);
+    };
+    const watch = (v) => {
+      clearTimeout(v._watch);
+      // toujours en pause 2,5 s après être arrivée à l'écran = lecture bloquée
+      v._watch = setTimeout(() => { if (visible.has(v) && v.paused && !document.hidden) swapToAnimated(v); }, 2500);
+    };
     const tryPlay = (v) => {
+      if (v.dataset.swapped) return;
       if (!v.dataset.loaded && $("source[data-src]", v)) { $$("source[data-src]", v).forEach((s) => (s.src = s.dataset.src)); v.load(); }
       v.dataset.loaded = 1;
-      const p = v.play(); if (p && p.catch) p.catch(() => {});
+      const p = v.play();
+      if (p && p.catch) p.catch((err) => { if (err && err.name === "NotAllowedError") swapToAnimated(v); });
+      watch(v);
     };
     vids.forEach((v) => {
       v.muted = true; v.defaultMuted = true; v.playsInline = true; v.loop = true;
@@ -456,7 +484,7 @@
       // si le fichier est introuvable, on garde l'image (poster) au lieu d'un cadre vide
       $$("source", v).forEach((s) => s.addEventListener("error", () => v.removeAttribute("src")));
     });
-    const io = new IntersectionObserver((entries) => entries.forEach((en) => {
+    io = new IntersectionObserver((entries) => entries.forEach((en) => {
       const v = en.target;
       if (en.isIntersecting) { visible.add(v); tryPlay(v); } else { visible.delete(v); v.pause(); }
     }), { rootMargin: "150px 0px", threshold: 0.01 });
