@@ -451,6 +451,14 @@
     const swapToAnimated = (v) => {
       if (v.dataset.swapped || !v.dataset.fallback || !v.isConnected) return;
       v.dataset.swapped = 1;
+      // AVIF animé (haute qualité, léger) en priorité, WebP animé pour les vieux navigateurs
+      const pic = document.createElement("picture");
+      pic.style.display = "contents";
+      if (v.dataset.fallbackAvif) {
+        const s = document.createElement("source");
+        s.type = "image/avif"; s.srcset = v.dataset.fallbackAvif;
+        pic.appendChild(s);
+      }
       const img = new Image();
       img.decoding = "async";
       img.alt = "";
@@ -458,10 +466,11 @@
       img.className = v.className + " is-animated";
       if (v.id) img.id = v.id;
       img.src = v.dataset.fallback;
+      pic.appendChild(img);
       io && io.unobserve(v);
       visible.delete(v);
       v.pause();
-      v.replaceWith(img);
+      v.replaceWith(pic);
     };
     const watch = (v) => {
       clearTimeout(v._watch);

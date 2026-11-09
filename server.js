@@ -24,7 +24,7 @@ const read = (f) => { try { return JSON.parse(fs.readFileSync(f, "utf8")); } cat
 const write = (f, d) => { const tmp = f + ".tmp"; fs.writeFileSync(tmp, JSON.stringify(d, null, 2)); fs.renameSync(tmp, f); };
 
 const MIME = { ".html": "text/html; charset=utf-8", ".css": "text/css", ".js": "application/javascript", ".json": "application/json",
-  ".webp": "image/webp", ".png": "image/png", ".jpg": "image/jpeg", ".svg": "image/svg+xml", ".mp4": "video/mp4", ".webmanifest": "application/manifest+json",
+  ".webp": "image/webp", ".avif": "image/avif", ".png": "image/png", ".jpg": "image/jpeg", ".svg": "image/svg+xml", ".mp4": "video/mp4", ".webmanifest": "application/manifest+json",
   ".xml": "application/xml", ".txt": "text/plain", ".ico": "image/x-icon", ".woff2": "font/woff2" };
 
 const hits = new Map(); // anti-spam simple : 10 requêtes / 10 min / IP
@@ -120,7 +120,7 @@ const server = http.createServer(async (req, res) => {
     fs.stat(file, (err, st) => {
       if (err || !st.isFile()) { res.writeHead(404, { "Content-Type": "text/plain; charset=utf-8" }); return res.end("Page introuvable"); }
       const ext = path.extname(file).toLowerCase();
-      const headers = { "Content-Type": MIME[ext] || "application/octet-stream", "Cache-Control": /\.(webp|png|jpg|mp4|svg|woff2)$/.test(ext) ? "public, max-age=604800" : "no-cache", "Accept-Ranges": "bytes" };
+      const headers = { "Content-Type": MIME[ext] || "application/octet-stream", "Cache-Control": /\.(webp|avif|png|jpg|mp4|svg|woff2)$/.test(ext) ? "public, max-age=604800" : "no-cache", "Accept-Ranges": "bytes" };
       const range = req.headers.range;
       if (range && ext === ".mp4") { // streaming vidéo
         const [s, e] = range.replace("bytes=", "").split("-"); const start = +s, end = e ? +e : st.size - 1;

@@ -26,8 +26,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Manrope:wght@400;500;600;700&family=Pinyon+Script&display=swap" rel="stylesheet" />
-  <link rel="preload" as="image" href="assets/video/hero-v2.jpg" />
-  <link rel="stylesheet" href="css/style.css?v=12" />
+  <link rel="preload" as="image" href="assets/video/hero-v3.jpg" />
+  <link rel="stylesheet" href="css/style.css?v=13" />
 
   <script type="application/ld+json">
   {
@@ -104,10 +104,10 @@
     <!-- ============ HERO ============ -->
     <section class="hero" id="hero">
       <div class="hero__media">
-        <video class="hero__video" id="heroVideo" muted loop playsinline preload="auto" poster="assets/video/hero-v2.jpg" autoplay disablepictureinpicture disableremoteplayback data-auto data-fallback="assets/video/hero-v2.webp">
-          <source src="assets/video/hero-v2.mp4" type="video/mp4" />
+        <video class="hero__video" id="heroVideo" muted loop playsinline preload="auto" poster="assets/video/hero-v3.jpg" autoplay disablepictureinpicture disableremoteplayback data-auto data-fallback="assets/video/hero-v2.webp" data-fallback-avif="assets/video/hero-v3.avif">
+          <source src="assets/video/hero-v3.mp4" type="video/mp4" />
         </video>
-        <img class="hero__fallback" src="assets/video/hero-v2.jpg" alt="Mannequin portant la Doudoune Signature BELIEVE ME noire" />
+        <img class="hero__fallback" src="assets/video/hero-v3.jpg" alt="Mannequin portant la Doudoune Signature BELIEVE ME noire" />
         <div class="hero__veil"></div>
       </div>
       <div class="hero__content">
@@ -185,8 +185,8 @@
     <!-- ============ FILM MANIFESTE (HyperFrames) ============ -->
     <section class="manifesto" id="manifesto">
       <div class="manifesto__frame">
-        <video id="manifestoVideo" muted playsinline loop preload="metadata" poster="assets/video/manifesto.jpg" autoplay disablepictureinpicture disableremoteplayback data-auto data-fallback="assets/video/manifesto.webp">
-          <source src="assets/video/manifesto.mp4" type="video/mp4" />
+        <video id="manifestoVideo" muted playsinline loop preload="metadata" poster="assets/video/manifesto-v3.jpg" autoplay disablepictureinpicture disableremoteplayback data-auto data-fallback="assets/video/manifesto.webp" data-fallback-avif="assets/video/manifesto-v3.avif">
+          <source src="assets/video/manifesto-v3.mp4" type="video/mp4" />
         </video>
       </div>
       <div class="manifesto__text">
@@ -206,11 +206,11 @@
         <h2 data-i18n="look.title">Portée dans la vraie vie.</h2>
       </header>
       <div class="lookbook__rail" id="lookRail">
-        <figure class="look look--tall"><video muted loop playsinline preload="none" poster="assets/video/turn-v2.jpg" data-lazy-video autoplay disablepictureinpicture disableremoteplayback data-auto data-fallback="assets/video/turn-v2.webp"><source data-src="assets/video/turn-v2.mp4" type="video/mp4" /></video><figcaption>Noir Minuit</figcaption></figure>
+        <figure class="look look--tall"><video muted loop playsinline preload="none" poster="assets/video/turn-v3.jpg" data-lazy-video autoplay disablepictureinpicture disableremoteplayback data-auto data-fallback="assets/video/turn-v2.webp" data-fallback-avif="assets/video/turn-v3.avif"><source data-src="assets/video/turn-v3.mp4" type="video/mp4" /></video><figcaption>Noir Minuit</figcaption></figure>
         <figure class="look look--wide"><img loading="lazy" src="assets/img/campaign-studio-v2.webp" alt="Campagne studio Doudoune Signature" /><figcaption>Studio</figcaption></figure>
         <figure class="look look--tall"><img loading="lazy" src="assets/img/campaign-night-v2.webp" alt="Doudoune Signature de nuit, broderie au dos" /><figcaption>After dark</figcaption></figure>
         <figure class="look look--tall"><img loading="lazy" src="assets/img/street-front.webp" alt="Doudoune Signature portée de face" /><figcaption>Monogramme BM</figcaption></figure>
-        <figure class="look look--square look--light"><video muted loop playsinline preload="none" poster="assets/video/float.jpg" data-lazy-video autoplay disablepictureinpicture disableremoteplayback data-auto data-fallback="assets/video/float.webp"><source data-src="assets/video/float.mp4" type="video/mp4" /></video><figcaption>La broderie</figcaption></figure>
+        <figure class="look look--square look--light"><video muted loop playsinline preload="none" poster="assets/video/float-v3.jpg" data-lazy-video autoplay disablepictureinpicture disableremoteplayback data-auto data-fallback="assets/video/float.webp" data-fallback-avif="assets/video/float-v3.avif"><source data-src="assets/video/float-v3.mp4" type="video/mp4" /></video><figcaption>La broderie</figcaption></figure>
         <figure class="look look--square look--light"><img loading="lazy" src="assets/img/brown-back.webp" alt="Doudoune Signature Chocolat, dos" /><figcaption>Chocolat</figcaption></figure>
         <figure class="look look--square look--light"><img loading="lazy" src="assets/img/grey-front.webp" alt="Doudoune Signature Pierre, face" /><figcaption>Pierre</figcaption></figure>
       </div>
@@ -384,9 +384,9 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
-  <script src="js/config.js?v=12"></script>
-  <script src="js/catalog.js?v=12"></script>
-  <script src="js/i18n.js?v=12"></script>
-  <script src="js/app.js?v=12"></script>
+  <script src="js/config.js?v=13"></script>
+  <script src="js/catalog.js?v=13"></script>
+  <script src="js/i18n.js?v=13"></script>
+  <script src="js/app.js?v=13"></script>
 </body>
 </html>
