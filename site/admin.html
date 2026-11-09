@@ -84,7 +84,7 @@
       data = await r.json();
       sessionStorage.setItem("bm_admin", token);
       $("#login").hidden = true; $("#dash").hidden = false; $("#hdrTools").hidden = false;
-      $("#csvBtn").href = "/api/admin/export.csv?token=" + encodeURIComponent(token);
+      $("#csvBtn").href = "/api/admin/export?token=" + encodeURIComponent(token);
       render();
     }
     function bars(el, obj, label = (k) => k, sort = true) {

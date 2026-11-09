@@ -103,7 +103,7 @@ const server = http.createServer(async (req, res) => {
         if (!p) return json(res, 404, { error: "Introuvable" });
         p.status = clean(b.status, 20); write(FILES.preorders, list); return json(res, 200, { ok: true });
       }
-      if (url.pathname === "/api/admin/export.csv") {
+      if ((url.pathname === "/api/admin/export" || url.pathname === "/api/admin/export.csv")) {
         const cols = ["ref", "createdAt", "status", "productName", "color", "size", "qty", "priceEur", "firstName", "lastName", "email", "phone", "country", "city", "lang", "newsletter", "source"];
         const csv = "﻿" + [cols.join(";"), ...list.map((p) => cols.map((c) => csvCell(p[c])).join(";"))].join("\n");
         res.writeHead(200, { "Content-Type": "text/csv; charset=utf-8", "Content-Disposition": "attachment; filename=precommandes-believe-me.csv" });

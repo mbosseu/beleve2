@@ -210,7 +210,7 @@
       state.counts = j.byProduct || {};
       total = state.counts[featured()?.id] || 0;
     } catch {
-      total = store.get("bm_local_preorders", []).length;
+      total = 0;
     }
     setCount(total);
   }
@@ -287,20 +287,28 @@
       newsletter: !!fd.newsletter, lang, source: new URLSearchParams(location.search).get("utm_source") || document.referrer || "direct"
     };
     const btn = $("button[type=submit]", f); btn.disabled = true; err.textContent = "";
-    let ref = null;
+    let ref = null, saved = false, serverMsg = "";
     try {
       const r = await fetch(`${CFG.apiBase || ""}/api/preorders`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
       const j = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(j.error || "server");
-      ref = j.ref; setCount(j.total ?? (state.total || 0) + 1);
-    } catch (ex) {
-      if (ex.message && ex.message !== "server" && !/fetch|network|Failed/i.test(ex.message)) { err.textContent = ex.message; btn.disabled = false; return; }
-      // pas de serveur : on garde la précommande localement
-      ref = "BM-" + Math.random().toString(36).slice(2, 8).toUpperCase();
-      const loc = store.get("bm_local_preorders", []); loc.push({ ...payload, ref, createdAt: new Date().toISOString() }); store.set("bm_local_preorders", loc);
-      setCount((state.total || 0) + 1);
+      if (r.ok && j.ref) { ref = j.ref; saved = true; setCount(j.total ?? (state.total || 0) + 1); }
+      else if (r.status === 400 || r.status === 429) serverMsg = j.error || "";
+    } catch {}
+    if (serverMsg) { err.textContent = serverMsg; btn.disabled = false; return; }
+    // Service de formulaires externe (optionnel, config.js) : sauvegarde de secours
+    if (CFG.externalEndpoint) {
+      ref = ref || "BM-" + Math.random().toString(36).slice(2, 8).toUpperCase();
+      try {
+        const r2 = await fetch(CFG.externalEndpoint, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify({ ...payload, ref }) });
+        if (r2.ok) saved = true;
+      } catch {}
     }
-    if (CFG.externalEndpoint) fetch(CFG.externalEndpoint, { method: "POST", headers: { "Content-Type": "application/json", Accept: "application/json" }, body: JSON.stringify({ ...payload, ref }) }).catch(() => {});
+    if (!saved) {
+      // On ne confirme JAMAIS une précommande qui n'a pas été enregistrée.
+      const loc = store.get("bm_local_preorders", []); loc.push({ ...payload, createdAt: new Date().toISOString() }); store.set("bm_local_preorders", loc);
+      err.innerHTML = `${t("errNet")} <a href="mailto:${CAT.brand.email}" style="text-decoration:underline">${CAT.brand.email}</a>`;
+      btn.disabled = false; return;
+    }
     btn.disabled = false; f.reset();
     $("#doneRef").textContent = ref;
     f.hidden = true; $("#modalDone").hidden = false;
@@ -318,13 +326,15 @@
     try {
       const r = await fetch(`${CFG.apiBase || ""}/api/subscribe`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ email, interest, lang }) });
       return r.ok;
-    } catch { const l = store.get("bm_local_subs", []); l.push({ email, interest }); store.set("bm_local_subs", l); return true; }
+    } catch { return false; }
   }
   $("#joinForm").addEventListener("submit", async (e) => {
     e.preventDefault();
+    const form = e.currentTarget;
     const email = $("#joinEmail").value.trim();
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) { $("#joinMsg").textContent = t("joinedErr"); return; }
-    await subscribe(email, "newsletter"); $("#joinMsg").textContent = t("joined"); e.currentTarget.reset();
+    if (await subscribe(email, "newsletter")) { $("#joinMsg").textContent = t("joined"); form.reset(); }
+    else $("#joinMsg").textContent = t("subErr");
   });
 
   function renderSoon() {
@@ -343,7 +353,7 @@
       const b = e.target.closest("[data-notify]"); if (!b) return;
       const email = prompt(lang === "fr" ? "Ton e-mail pour être prévenu(e) :" : "Your email to be notified:");
       if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email)) return;
-      await subscribe(email.trim(), b.dataset.notify);
+      if (!(await subscribe(email.trim(), b.dataset.notify))) { toast(t("subErr")); return; }
       const n = store.get("bm_notify", []); n.push(b.dataset.notify); store.set("bm_notify", n);
       b.classList.add("is-on"); b.textContent = t("notified");
     };
