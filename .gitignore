@@ -8,3 +8,6 @@ node_modules/
 *.log
 .DS_Store
 Thumbs.db
+
+# Photos de référence personnelles (non publiées)
+WhatsApp Image*

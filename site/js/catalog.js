@@ -56,7 +56,7 @@ window.BM_CATALOG = {
         {
           id: "noir", hex: "#111111", name: { fr: "Noir Minuit", en: "Midnight Black" },
           images: ["assets/img/black-front.webp", "assets/img/black-back.webp", "assets/img/detail-monogram.webp", "assets/img/detail-back.webp", "assets/img/detail-zip.webp", "assets/img/detail-cuff.webp"],
-          worn: ["assets/img/campaign-studio.webp", "assets/img/campaign-night.webp", "assets/img/street-front.webp", "assets/img/street-back.webp"]
+          worn: ["assets/img/campaign-studio-v2.webp", "assets/img/campaign-night-v2.webp", "assets/img/street-front.webp", "assets/img/street-back.webp"]
         },
         {
           id: "chocolat", hex: "#3b2418", name: { fr: "Chocolat", en: "Chocolate" },
